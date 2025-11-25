@@ -2,12 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAuctions } from '../api/auctions';
 import type { Auction } from '../types';
-import SearchFilters from '../components/SearchFilters';
 import Timer from '../components/Timer';
 
 const Home: React.FC = () => {
     const [auctions, setAuctions] = useState<Auction[]>([]);
-    const [filteredAuctions, setFilteredAuctions] = useState<Auction[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -19,42 +17,11 @@ const Home: React.FC = () => {
             const data = await getAuctions();
             const activeAuctions = data.filter(a => a.status === 'ativo' || a.status === 'agendado');
             setAuctions(activeAuctions);
-            setFilteredAuctions(activeAuctions);
         } catch (error) {
             console.error('Failed to fetch auctions', error);
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const handleSearch = (query: string, categoryId: string, minPrice: string, maxPrice: string, status: string) => {
-        let result = auctions;
-
-        if (query) {
-            const lowerQuery = query.toLowerCase();
-            result = result.filter(a =>
-                a.title.toLowerCase().includes(lowerQuery) ||
-                a.items.some(i => i.name.toLowerCase().includes(lowerQuery))
-            );
-        }
-
-        if (categoryId) {
-            result = result.filter(a => a.items.some(i => i.categoryId === categoryId));
-        }
-
-        if (minPrice) {
-            result = result.filter(a => a.items.some(i => Number(i.currentValue) >= parseFloat(minPrice)));
-        }
-
-        if (maxPrice) {
-            result = result.filter(a => a.items.some(i => Number(i.currentValue) <= parseFloat(maxPrice)));
-        }
-
-        if (status) {
-            result = result.filter(a => a.status === status);
-        }
-
-        setFilteredAuctions(result);
     };
 
     return (
@@ -66,13 +33,11 @@ const Home: React.FC = () => {
                 <p className="text-xl text-muted">Discover exclusive items and bid in real-time.</p>
             </div>
 
-            <SearchFilters onSearch={handleSearch} />
-
             {isLoading ? (
                 <div className="text-center">Loading auctions...</div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredAuctions.map((auction) => (
+                    {auctions.map((auction) => (
                         <Link to={`/auction/${auction.id}`} key={auction.id} className="card hover:border-accent transition-colors group" style={{ textDecoration: 'none', color: 'inherit' }}>
                             <div className="aspect-video bg-gray-800 rounded-md mb-4 overflow-hidden relative">
                                 {auction.items[0]?.images?.[0] ? (
@@ -93,7 +58,10 @@ const Home: React.FC = () => {
                                 <div>
                                     <div className="text-xs text-muted mb-1">Current Bid</div>
                                     <div className="text-lg font-bold text-accent">
-                                        ${auction.items[0]?.currentValue ? parseFloat(String(auction.items[0].currentValue)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '0'}
+                                        ${(() => {
+                                            const currentItem = auction.items.find(item => item.id === auction.currentItemId) || auction.items[0];
+                                            return currentItem?.currentValue ? parseFloat(String(currentItem.currentValue)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '0';
+                                        })()}
                                     </div>
                                 </div>
                                 <div className="text-right">
@@ -105,9 +73,9 @@ const Home: React.FC = () => {
                             </div>
                         </Link>
                     ))}
-                    {filteredAuctions.length === 0 && (
+                    {auctions.length === 0 && (
                         <div className="col-span-full text-center py-12 text-muted">
-                            No auctions found matching your criteria.
+                            No active auctions at the moment.
                         </div>
                     )}
                 </div>

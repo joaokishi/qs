@@ -32,7 +32,7 @@ const AuctionRoom: React.FC = () => {
                 console.log('New bid:', bid);
                 setBids(prev => [bid, ...prev]);
                 if (currentItem) {
-                    setCurrentItem(prev => prev ? { ...prev, currentPrice: bid.amount } : null);
+                    setCurrentItem(prev => prev ? { ...prev, currentValue: bid.amount } : null);
                 }
             });
 
@@ -56,7 +56,7 @@ const AuctionRoom: React.FC = () => {
                 socket.off('item:changed');
             };
         }
-    }, [socket, id, isConnected, currentItem]);
+    }, [socket, id, isConnected]);
 
     if (!isConnected) {
         return <div className="text-center mt-8">Connecting to auction server...</div>;
@@ -72,8 +72,8 @@ const AuctionRoom: React.FC = () => {
             <div className="md:col-span-2 space-y-6">
                 <div className="card">
                     <div className="aspect-video bg-gray-900 rounded-lg flex items-center justify-center mb-4 relative overflow-hidden">
-                        {currentItem.imageUrl ? (
-                            <img src={currentItem.imageUrl} alt={currentItem.title} className="w-full h-full object-contain" />
+                        {currentItem.images && currentItem.images.length > 0 ? (
+                            <img src={currentItem.images[0]} alt={currentItem.name} className="w-full h-full object-contain" />
                         ) : (
                             <div className="text-gray-500 flex flex-col items-center">
                                 <Gavel size={48} />
@@ -89,12 +89,12 @@ const AuctionRoom: React.FC = () => {
 
                     <div className="flex justify-between items-start">
                         <div>
-                            <h1 className="text-2xl font-bold">{currentItem.title}</h1>
+                            <h1 className="text-2xl font-bold">{currentItem.name}</h1>
                             <p className="text-muted mt-2">{currentItem.description}</p>
                         </div>
                         <div className="text-right">
                             <div className="label">Current Price</div>
-                            <div className="text-3xl font-bold text-accent">${currentItem.currentPrice.toLocaleString()}</div>
+                            <div className="text-3xl font-bold text-accent">${Number(currentItem.currentValue).toLocaleString()}</div>
                         </div>
                     </div>
                 </div>
@@ -102,8 +102,8 @@ const AuctionRoom: React.FC = () => {
                 {/* Bidding Controls */}
                 <BidControls
                     itemId={currentItem.id}
-                    currentPrice={currentItem.currentPrice}
-                    minimumIncrement={currentItem.minimumIncrement}
+                    currentPrice={Number(currentItem.currentValue)}
+                    minimumIncrement={Number(currentItem.minimumIncrement)}
                 />
             </div>
 

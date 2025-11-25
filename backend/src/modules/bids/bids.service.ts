@@ -21,16 +21,15 @@ export class BidsService {
     @InjectRepository(Item)
     private itemRepository: Repository<Item>,
     private dataSource: DataSource,
-  ) {}
+  ) { }
 
   async placeBid(userId: string, createBidDto: CreateBidDto) {
     // Usar transação com row-level lock para evitar race conditions
     return await this.dataSource.transaction(async (manager) => {
-      // Buscar item com lock pessimista
+      // Buscar item (SQLite não suporta pessimistic lock, mas a transação ainda garante isolamento)
       const item = await manager.findOne(Item, {
         where: { id: createBidDto.itemId },
         relations: ['auction'],
-        lock: { mode: 'pessimistic_write' },
       });
 
       if (!item) {
@@ -133,7 +132,6 @@ export class BidsService {
       const bid = await manager.findOne(Bid, {
         where: { id: bidId },
         relations: ['item'],
-        lock: { mode: 'pessimistic_write' },
       });
 
       if (!bid) {

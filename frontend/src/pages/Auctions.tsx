@@ -101,7 +101,10 @@ const Auctions: React.FC = () => {
                                 <div>
                                     <div className="text-xs text-muted mb-1">Current Bid</div>
                                     <div className="text-lg font-bold text-accent">
-                                        ${auction.items[0]?.currentValue ? parseFloat(String(auction.items[0].currentValue)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '0'}
+                                        ${(() => {
+                                            const currentItem = auction.items.find(item => item.id === auction.currentItemId) || auction.items[0];
+                                            return currentItem?.currentValue ? parseFloat(String(currentItem.currentValue)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '0';
+                                        })()}
                                     </div>
                                 </div>
                                 <div className="text-right">

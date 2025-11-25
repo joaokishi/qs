@@ -18,8 +18,8 @@ export class AuditLog {
   userId: string;
 
   @Column({
-    type: 'enum',
-    enum: AuditAction,
+    type: 'varchar',
+    length: 50,
   })
   action: AuditAction;
 

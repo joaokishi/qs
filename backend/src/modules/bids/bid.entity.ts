@@ -36,8 +36,8 @@ export class Bid {
   amount: number;
 
   @Column({
-    type: 'enum',
-    enum: BidStatus,
+    type: 'varchar',
+    length: 20,
     default: BidStatus.VALID,
   })
   status: BidStatus;

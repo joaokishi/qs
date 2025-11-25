@@ -26,15 +26,15 @@ export class User {
   password: string;
 
   @Column({
-    type: 'enum',
-    enum: UserRole,
+    type: 'varchar',
+    length: 20,
     default: UserRole.PARTICIPANT,
   })
   role: UserRole;
 
   @Column({
-    type: 'enum',
-    enum: UserStatus,
+    type: 'varchar',
+    length: 20,
     default: UserStatus.ACTIVE,
   })
   status: UserStatus;

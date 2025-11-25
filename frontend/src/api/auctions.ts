@@ -3,8 +3,8 @@ import type { Auction } from '../types';
 
 export interface CreateAuctionDto {
     title: string;
-    startTime: string;
-    endTime: string;
+    startDate: string;
+    expectedEndDate: string;
     itemIds: string[];
 }
 

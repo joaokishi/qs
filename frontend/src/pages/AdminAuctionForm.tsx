@@ -39,8 +39,8 @@ const AdminAuctionForm: React.FC = () => {
             const data = await getAuction(auctionId);
             setTitle(data.title);
             // Format dates for datetime-local input (YYYY-MM-DDThh:mm)
-            setStartTime(new Date(data.startTime).toISOString().slice(0, 16));
-            setEndTime(new Date(data.endTime).toISOString().slice(0, 16));
+            setStartTime(new Date(data.startDate).toISOString().slice(0, 16));
+            setEndTime(new Date(data.expectedEndDate).toISOString().slice(0, 16));
             setSelectedItemIds(data.items.map(i => i.id));
         } catch (err) {
             setError('Failed to fetch auction details');
@@ -57,8 +57,8 @@ const AdminAuctionForm: React.FC = () => {
         try {
             const auctionData = {
                 title,
-                startTime: new Date(startTime).toISOString(),
-                endTime: new Date(endTime).toISOString(),
+                startDate: new Date(startTime).toISOString(),
+                expectedEndDate: new Date(endTime).toISOString(),
                 itemIds: selectedItemIds,
             };
 
@@ -107,23 +107,37 @@ const AdminAuctionForm: React.FC = () => {
 
                     <div className="flex gap-4">
                         <div className="input-group flex-1">
-                            <label className="label">Start Time</label>
+                            <label className="label">
+                                Start Date & Time
+                                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 'normal', marginLeft: '0.5rem' }}>
+                                    (Click to open calendar)
+                                </span>
+                            </label>
                             <input
                                 type="datetime-local"
                                 className="input"
                                 value={startTime}
                                 onChange={(e) => setStartTime(e.target.value)}
+                                min={new Date().toISOString().slice(0, 16)}
                                 required
+                                style={{ cursor: 'pointer' }}
                             />
                         </div>
                         <div className="input-group flex-1">
-                            <label className="label">End Time</label>
+                            <label className="label">
+                                Expected End Date & Time
+                                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 'normal', marginLeft: '0.5rem' }}>
+                                    (Click to open calendar)
+                                </span>
+                            </label>
                             <input
                                 type="datetime-local"
                                 className="input"
                                 value={endTime}
                                 onChange={(e) => setEndTime(e.target.value)}
+                                min={startTime || new Date().toISOString().slice(0, 16)}
                                 required
+                                style={{ cursor: 'pointer' }}
                             />
                         </div>
                     </div>
@@ -162,7 +176,7 @@ const AdminAuctionForm: React.FC = () => {
                                         style={{ pointerEvents: 'none' }}
                                     />
                                     <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                        {item.title}
+                                        {item.name}
                                     </div>
                                 </div>
                             ))}

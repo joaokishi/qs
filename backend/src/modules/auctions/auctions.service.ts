@@ -19,7 +19,7 @@ export class AuctionsService {
     private auctionRepository: Repository<Auction>,
     @InjectRepository(Item)
     private itemRepository: Repository<Item>,
-  ) {}
+  ) { }
 
   async create(createAuctionDto: CreateAuctionDto) {
     const { itemIds, ...auctionData } = createAuctionDto;
@@ -188,22 +188,27 @@ export class AuctionsService {
   // Cron job para verificar e encerrar itens automaticamente
   @Cron(CronExpression.EVERY_5_SECONDS)
   async checkAuctionTimers() {
-    const activeAuctions = await this.auctionRepository.find({
-      where: { status: AuctionStatus.ACTIVE },
-    });
+    try {
+      const activeAuctions = await this.auctionRepository.find({
+        where: { status: AuctionStatus.ACTIVE },
+      });
 
-    // Se não houver leilões ativos, não faz nada
-    if (activeAuctions.length === 0) {
-      return;
-    }
-
-    for (const auction of activeAuctions) {
-      if (
-        auction.currentItemEndTime &&
-        new Date() >= auction.currentItemEndTime
-      ) {
-        await this.nextItem(auction.id);
+      // Se não houver leilões ativos, não faz nada
+      if (activeAuctions.length === 0) {
+        return;
       }
+
+      for (const auction of activeAuctions) {
+        if (
+          auction.currentItemEndTime &&
+          new Date() >= auction.currentItemEndTime
+        ) {
+          await this.nextItem(auction.id);
+        }
+      }
+    } catch (error) {
+      // Silently ignore errors during startup when tables don't exist yet
+      // This prevents the cron job from crashing the application
     }
   }
 }

@@ -64,15 +64,15 @@ const AdminItems: React.FC = () => {
                         {items.map((item) => (
                             <tr key={item.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
                                 <td style={{ padding: '1rem' }}>
-                                    {item.imageUrl ? (
-                                        <img src={item.imageUrl} alt={item.title} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
+                                    {item.images && item.images.length > 0 ? (
+                                        <img src={item.images[0]} alt={item.name} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
                                     ) : (
                                         <div style={{ width: '50px', height: '50px', backgroundColor: 'var(--color-border)', borderRadius: 'var(--radius-sm)' }} />
                                     )}
                                 </td>
-                                <td style={{ padding: '1rem' }}>{item.title}</td>
-                                <td style={{ padding: '1rem' }}>${item.startingPrice.toLocaleString()}</td>
-                                <td style={{ padding: '1rem' }}>{item.state}</td>
+                                <td style={{ padding: '1rem' }}>{item.name}</td>
+                                <td style={{ padding: '1rem' }}>${Number(item.initialValue).toLocaleString()}</td>
+                                <td style={{ padding: '1rem' }}>{item.condition}</td>
                                 <td style={{ padding: '1rem', textAlign: 'right' }}>
                                     <div className="flex justify-end gap-2">
                                         <Link to={`/admin/items/${item.id}/edit`} className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem' }}>

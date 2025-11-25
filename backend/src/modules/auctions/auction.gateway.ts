@@ -13,6 +13,10 @@ import { JwtService } from '@nestjs/jwt';
 import { BidsService } from '@/modules/bids/bids.service';
 import { AuctionsService } from '@/modules/auctions/auctions.service';
 
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Item } from '@/modules/items/item.entity';
+
 @WebSocketGateway({
   cors: {
     origin: process.env.WS_CORS_ORIGIN || 'http://localhost:4200',
@@ -30,12 +34,14 @@ export class AuctionGateway implements OnGatewayConnection, OnGatewayDisconnect 
     private jwtService: JwtService,
     private bidsService: BidsService,
     private auctionsService: AuctionsService,
-  ) {}
+    @InjectRepository(Item)
+    private itemRepository: Repository<Item>,
+  ) { }
 
   async handleConnection(client: Socket) {
     try {
       const token = client.handshake.auth.token || client.handshake.headers.authorization;
-      
+
       if (!token) {
         client.disconnect();
         return;
@@ -43,9 +49,9 @@ export class AuctionGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
       const payload = this.jwtService.verify(token.replace('Bearer ', ''));
       this.connectedClients.set(client.id, payload.sub);
-      
+
       console.log(`Cliente conectado: ${client.id} - Usuário: ${payload.sub}`);
-      
+
       // Enviar estado inicial do leilão
       const activeAuctions = await this.auctionsService.findActive();
       client.emit('auctions:active', activeAuctions);
@@ -68,9 +74,36 @@ export class AuctionGateway implements OnGatewayConnection, OnGatewayDisconnect 
   ) {
     client.join(`auction:${auctionId}`);
     console.log(`Cliente ${client.id} entrou no leilão ${auctionId}`);
-    
+
     const auction = await this.auctionsService.findOne(auctionId);
-    client.emit('auction:state', auction);
+
+    console.log('Auction data:', {
+      id: auction.id,
+      currentItemId: auction.currentItemId,
+      itemsCount: auction.items?.length,
+      itemIds: auction.items?.map(i => i.id)
+    });
+
+    // Find current item
+    let currentItem = auction.items?.find(item => item.id === auction.currentItemId);
+
+    // Fallback: if currentItem is not found in relations but ID exists, fetch it directly
+    if (!currentItem && auction.currentItemId) {
+      console.log('Current item not found in relations, fetching directly:', auction.currentItemId);
+      currentItem = await this.itemRepository.findOne({ where: { id: auction.currentItemId } });
+    }
+
+    console.log('Current item found:', currentItem ? currentItem.id : 'NULL');
+
+    // Get bids for current item
+    const bids = currentItem ? await this.bidsService.getItemBids(currentItem.id) : [];
+
+    client.emit('auction:state', {
+      auction,
+      currentItem: currentItem || null,
+      bids,
+      endTime: auction.currentItemEndTime || null,
+    });
   }
 
   @SubscribeMessage('auction:leave')
@@ -89,7 +122,7 @@ export class AuctionGateway implements OnGatewayConnection, OnGatewayDisconnect 
   ) {
     client.join(`item:${itemId}`);
     console.log(`Cliente ${client.id} entrou no item ${itemId}`);
-    
+
     const bids = await this.bidsService.getItemBids(itemId);
     client.emit('item:bids', bids);
   }

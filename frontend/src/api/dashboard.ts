@@ -6,11 +6,12 @@ export interface DashboardMetrics {
     totalUsers: number;
 }
 
+import type { Item } from '../types';
+
 export interface TopItem {
-    id: string;
-    title: string;
+    item: Item;
     bidCount: number;
-    currentPrice: number;
+    highestBid: number;
 }
 
 export const getMetrics = async (): Promise<DashboardMetrics> => {

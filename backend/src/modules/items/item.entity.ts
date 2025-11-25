@@ -25,8 +25,8 @@ export class Item {
   description: string;
 
   @Column({
-    type: 'enum',
-    enum: ItemCondition,
+    type: 'varchar',
+    length: 20,
     default: ItemCondition.GOOD,
   })
   condition: ItemCondition;

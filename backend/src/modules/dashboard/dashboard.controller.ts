@@ -12,7 +12,7 @@ import { UserRole } from '@/common/enums/user.enum';
 @Roles(UserRole.ADMIN)
 @Controller('dashboard')
 export class DashboardController {
-  constructor(private dashboardService: DashboardService) {}
+  constructor(private dashboardService: DashboardService) { }
 
   @Get('metrics')
   @ApiOperation({ summary: 'Métricas gerais do sistema (Admin)' })
@@ -25,8 +25,9 @@ export class DashboardController {
   @ApiOperation({ summary: 'Itens com mais lances (Admin)' })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'Lista de itens com mais lances' })
-  getItemsWithMostBids(@Query('limit', new ParseIntPipe({ optional: true })) limit?: number) {
-    return this.dashboardService.getItemsWithMostBids(limit);
+  getItemsWithMostBids(@Query('limit') limit?: string) {
+    const parsedLimit = limit ? parseInt(limit, 10) : undefined;
+    return this.dashboardService.getItemsWithMostBids(parsedLimit);
   }
 
   @Get('revenue/by-category')
@@ -47,7 +48,8 @@ export class DashboardController {
   @ApiOperation({ summary: 'Top participantes (Admin)' })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'Lista dos maiores participantes' })
-  getTopBidders(@Query('limit', new ParseIntPipe({ optional: true })) limit?: number) {
-    return this.dashboardService.getTopBidders(limit);
+  getTopBidders(@Query('limit') limit?: string) {
+    const parsedLimit = limit ? parseInt(limit, 10) : undefined;
+    return this.dashboardService.getTopBidders(parsedLimit);
   }
 }

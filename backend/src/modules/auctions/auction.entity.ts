@@ -30,8 +30,8 @@ export class Auction {
   actualEndDate: Date;
 
   @Column({
-    type: 'enum',
-    enum: AuctionStatus,
+    type: 'varchar',
+    length: 20,
     default: AuctionStatus.SCHEDULED,
   })
   status: AuctionStatus;
