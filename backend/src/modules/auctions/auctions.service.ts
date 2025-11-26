@@ -2,6 +2,8 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
@@ -12,6 +14,8 @@ import { CreateAuctionDto } from './dto/create-auction.dto';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
 import { AuctionStatus } from '@/common/enums/auction.enum';
 
+import { BidsService } from '@/modules/bids/bids.service';
+
 @Injectable()
 export class AuctionsService {
   constructor(
@@ -19,10 +23,23 @@ export class AuctionsService {
     private auctionRepository: Repository<Auction>,
     @InjectRepository(Item)
     private itemRepository: Repository<Item>,
+    @Inject(forwardRef(() => BidsService))
+    private bidsService: BidsService,
   ) { }
 
   async create(createAuctionDto: CreateAuctionDto) {
     const { itemIds, ...auctionData } = createAuctionDto;
+
+    // Validate startDate is at least 30 minutes in the future
+    const startDate = new Date(auctionData.startDate);
+    const now = new Date();
+    const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60000);
+
+    if (startDate < thirtyMinutesFromNow) {
+      throw new BadRequestException(
+        'A data de início deve ser pelo menos 30 minutos no futuro',
+      );
+    }
 
     // Verificar se os itens existem e estão disponíveis
     const items = await this.itemRepository.find({
@@ -42,6 +59,15 @@ export class AuctionsService {
     }
 
     const auction = this.auctionRepository.create(auctionData);
+
+    // Calculate expectedEndDate if not provided
+    if (!auction.expectedEndDate) {
+      const durationPerItemMinutes = 5;
+      const totalDurationMinutes = itemIds.length * durationPerItemMinutes;
+      const startDate = new Date(auction.startDate);
+      auction.expectedEndDate = new Date(startDate.getTime() + totalDurationMinutes * 60000);
+    }
+
     const savedAuction = await this.auctionRepository.save(auction);
 
     // Vincular itens ao leilão
@@ -135,6 +161,11 @@ export class AuctionsService {
     auction.currentItemId = auction.items[0].id;
     auction.currentItemEndTime = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos
 
+    // Recalculate expectedEndDate based on actual start time
+    const durationPerItemMinutes = 5;
+    const totalDurationMinutes = auction.items.length * durationPerItemMinutes;
+    auction.expectedEndDate = new Date(Date.now() + totalDurationMinutes * 60000);
+
     return this.auctionRepository.save(auction);
   }
 
@@ -143,6 +174,11 @@ export class AuctionsService {
 
     if (auction.status !== AuctionStatus.ACTIVE) {
       throw new BadRequestException('Leilão não está ativo');
+    }
+
+    // Mark current item as won before switching
+    if (auction.currentItemId) {
+      await this.bidsService.markBidsAsWon(auction.currentItemId);
     }
 
     const currentIndex = auction.items.findIndex(
@@ -162,6 +198,11 @@ export class AuctionsService {
 
   async endAuction(id: string) {
     const auction = await this.findOne(id);
+
+    // Mark last item as won if exists
+    if (auction.currentItemId) {
+      await this.bidsService.markBidsAsWon(auction.currentItemId);
+    }
 
     auction.status = AuctionStatus.COMPLETED;
     auction.actualEndDate = new Date();

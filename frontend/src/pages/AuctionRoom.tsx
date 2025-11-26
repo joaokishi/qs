@@ -109,7 +109,7 @@ const AuctionRoom: React.FC = () => {
 
             {/* Sidebar: Bids & History */}
             <div className="space-y-6">
-                <div className="card h-[600px] flex flex-col">
+                <div className="card h-[400px] flex flex-col">
                     <h3 className="text-xl mb-4 flex items-center gap-2">
                         <History size={20} />
                         Live Bids
@@ -137,6 +137,52 @@ const AuctionRoom: React.FC = () => {
                                 No bids yet. Be the first!
                             </div>
                         )}
+                    </div>
+                </div>
+
+                {/* Auction Items List */}
+                <div className="card">
+                    <h3 className="text-xl mb-4">Auction Items</h3>
+                    <div className="space-y-3">
+                        {auction?.items?.map((item, index) => {
+                            const isCurrent = item.id === currentItem.id;
+                            // Determine status based on index relative to current item
+                            // Note: This assumes items are ordered. If not, we might need better logic.
+                            // However, backend usually sends them in order.
+                            // A safer way is to check if it's the current item.
+                            // If it's not current, we can check if it has a winning bid (completed) or not (upcoming).
+                            // But for now, let's just highlight the current one.
+
+                            return (
+                                <div
+                                    key={item.id}
+                                    className={`p-3 rounded-lg flex items-center justify-between ${isCurrent
+                                            ? 'bg-accent/10 border border-accent'
+                                            : 'bg-gray-800/30'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isCurrent ? 'bg-accent text-white' : 'bg-gray-700 text-gray-400'
+                                            }`}>
+                                            {index + 1}
+                                        </div>
+                                        <div>
+                                            <div className={`font-medium ${isCurrent ? 'text-accent' : 'text-gray-300'}`}>
+                                                {item.name}
+                                            </div>
+                                            <div className="text-xs text-muted">
+                                                Starting: ${Number(item.initialValue).toLocaleString()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {isCurrent && (
+                                        <div className="text-xs font-bold text-accent uppercase tracking-wider">
+                                            Live
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

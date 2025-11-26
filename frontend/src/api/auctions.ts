@@ -4,7 +4,7 @@ import type { Auction } from '../types';
 export interface CreateAuctionDto {
     title: string;
     startDate: string;
-    expectedEndDate: string;
+    expectedEndDate?: string;
     itemIds: string[];
 }
 

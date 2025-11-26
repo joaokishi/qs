@@ -30,6 +30,7 @@ export interface Item {
     categoryId: string;
     auctionId?: string;
     category?: Category;
+    auction?: Auction;
 }
 
 export interface Auction {
@@ -41,6 +42,7 @@ export interface Auction {
     actualEndDate?: string;
     items: Item[];
     currentItemId?: string;
+    currentItemEndTime?: string;
 }
 
 export interface Bid {
@@ -51,4 +53,5 @@ export interface Bid {
     itemId: string;
     user?: User;
     item?: Item;
+    status: 'valido' | 'vencedor' | 'superado' | 'arrematado' | 'cancelado';
 }

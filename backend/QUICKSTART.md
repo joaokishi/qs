@@ -102,12 +102,12 @@ Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Body:**
 ```json
 {
-  "title": "Leilão de Imóveis - Dezembro 2024",
+  "title": "Leilão de Imóveis - Dezembro 2025",
   "description": "Grande leilão com propriedades premium",
-  "startDate": "2024-12-01T10:00:00Z",
-  "expectedEndDate": "2024-12-15T18:00:00Z",
+  "startDate": "2025-12-01T10:00:00Z",
   "itemIds": ["uuid-item-1", "uuid-item-2"]
 }
+> **Nota:** A data de início deve ser pelo menos 30 minutos no futuro.
 ```
 
 > **Dica:** Use `GET /api/items` para ver os IDs dos itens disponíveis.

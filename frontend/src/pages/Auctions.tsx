@@ -90,21 +90,25 @@ const Auctions: React.FC = () => {
                                 <div className="absolute top-2 right-2 flex gap-2">
                                     {getStatusBadge(auction.status)}
                                 </div>
-                                {auction.status === 'ativo' && (
+                                {(auction.status === 'ativo' || auction.status === 'agendado') && (
                                     <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono">
-                                        <Timer endTime={auction.expectedEndDate} />
+                                        <span className="mr-1 text-gray-400">
+                                            {auction.status === 'agendado' ? 'Starts in:' : 'Ends in:'}
+                                        </span>
+                                        <Timer endTime={auction.status === 'agendado' ? auction.startDate : (auction.currentItemEndTime || auction.expectedEndDate)} />
                                     </div>
                                 )}
                             </div>
                             <h3 className="text-xl font-bold mb-3 group-hover:text-accent transition-colors">{auction.title}</h3>
                             <div className="flex justify-between items-end">
                                 <div>
-                                    <div className="text-xs text-muted mb-1">Current Bid</div>
+                                    <div className="text-xs text-muted mb-1">Total Value</div>
                                     <div className="text-lg font-bold text-accent">
-                                        ${(() => {
-                                            const currentItem = auction.items.find(item => item.id === auction.currentItemId) || auction.items[0];
-                                            return currentItem?.currentValue ? parseFloat(String(currentItem.currentValue)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '0';
-                                        })()}
+                                        ${auction.items.reduce((acc, item) => {
+                                            const current = Number(item.currentValue);
+                                            const initial = Number(item.initialValue);
+                                            return acc + (current > initial ? current : 0);
+                                        }, 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                     </div>
                                 </div>
                                 <div className="text-right">

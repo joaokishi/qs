@@ -140,8 +140,7 @@ curl -X POST http://localhost:3000/api/auctions \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Leilão Teste",
-    "startDate": "2024-12-01T10:00:00Z",
-    "expectedEndDate": "2024-12-15T18:00:00Z",
+    "startDate": "2025-12-01T10:00:00Z", // Deve ser > 30 min no futuro
     "itemIds": ["uuid-1", "uuid-2"]
   }'
 

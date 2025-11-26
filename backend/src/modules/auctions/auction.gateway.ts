@@ -8,7 +8,7 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, Inject, forwardRef } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { BidsService } from '@/modules/bids/bids.service';
 import { AuctionsService } from '@/modules/auctions/auctions.service';
@@ -32,7 +32,9 @@ export class AuctionGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
   constructor(
     private jwtService: JwtService,
+    @Inject(forwardRef(() => BidsService))
     private bidsService: BidsService,
+    @Inject(forwardRef(() => AuctionsService))
     private auctionsService: AuctionsService,
     @InjectRepository(Item)
     private itemRepository: Repository<Item>,
@@ -129,7 +131,10 @@ export class AuctionGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
   // Métodos para emitir eventos do servidor
   notifyNewBid(itemId: string, auctionId: string, bid: any) {
+    // Emitir para a sala do leilão também, pois o frontend escuta lá
+    this.server.to(`auction:${auctionId}`).emit('bid:new', bid);
     this.server.to(`item:${itemId}`).emit('bid:new', bid);
+
     this.server.to(`auction:${auctionId}`).emit('item:updated', {
       itemId,
       currentValue: bid.amount,

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -12,7 +12,7 @@ import { BidsModule } from '@/modules/bids/bids.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Auction, Item]),
-    BidsModule,
+    forwardRef(() => BidsModule),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -25,4 +25,4 @@ import { BidsModule } from '@/modules/bids/bids.module';
   providers: [AuctionsService, AuctionGateway],
   exports: [AuctionsService, AuctionGateway],
 })
-export class AuctionsModule {}
+export class AuctionsModule { }

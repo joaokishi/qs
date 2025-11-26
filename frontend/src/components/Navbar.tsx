@@ -40,6 +40,9 @@ const Navbar: React.FC = () => {
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                     <Link to="/auctions" style={{ color: 'var(--color-text)' }}>Auctions</Link>
+                    {isAuthenticated && (
+                        <Link to="/my-bids" style={{ color: 'var(--color-text)' }}>My Bids</Link>
+                    )}
 
                     {isAuthenticated ? (
                         <>

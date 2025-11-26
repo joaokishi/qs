@@ -21,9 +21,10 @@ export class CreateAuctionDto {
   @IsDateString()
   startDate: string;
 
-  @ApiProperty({ example: '2024-12-15T18:00:00Z' })
+  @ApiProperty({ example: '2024-12-15T18:00:00Z', required: false })
+  @IsOptional()
   @IsDateString()
-  expectedEndDate: string;
+  expectedEndDate?: string;
 
   @ApiProperty({ type: [String], example: ['uuid-item-1', 'uuid-item-2'] })
   @IsArray()

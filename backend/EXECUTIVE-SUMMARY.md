@@ -10,9 +10,9 @@ Sistema completo de leilões online desenvolvido em **NestJS**, **MySQL** e **Ty
 - ✅ Autenticação JWT com roles (Admin/Participante)
 - ✅ Gestão completa de categorias e itens
 - ✅ Upload e otimização automática de imagens
-- ✅ Sistema de leilões com cronômetro automático
+- ✅ Sistema de leilões com cronômetro automático (sincronizado)
 - ✅ Lances com validação e controle de concorrência
-- ✅ WebSocket para atualizações em tempo real
+- ✅ WebSocket para atualizações em tempo real (bidirecional)
 - ✅ Prorrogação dinâmica (Soft Close 15s)
 - ✅ Dashboard com métricas e relatórios
 - ✅ Sistema de notificações por e-mail
@@ -20,6 +20,7 @@ Sistema completo de leilões online desenvolvido em **NestJS**, **MySQL** e **Ty
 - ✅ Moderação de lances (cancelamento)
 - ✅ Gestão de participantes (bloqueio/desbloqueio)
 - ✅ Busca e filtros avançados
+- ✅ Dashboard "Meus Lances" (status detalhado)
 
 ## 🔐 Segurança Implementada
 
@@ -113,7 +114,7 @@ WebSocket Events: 10
 3. Buscar e filtrar itens
 4. Conectar ao leilão ao vivo
 5. Realizar lances (manual ou rápido)
-6. Visualizar histórico de lances
+6. Visualizar histórico de lances (Dashboard "Meus Lances")
 7. Receber notificações (superado/arrematado)
 8. Ver itens que está ganhando
 

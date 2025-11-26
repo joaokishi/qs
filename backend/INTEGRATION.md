@@ -178,9 +178,10 @@ async function getMyBids() {
 // Agrupar por status
 function groupBidsByStatus(bids) {
   return {
-    winning: bids.filter(b => b.status === 'vencedor'),
-    outbid: bids.filter(b => b.status === 'superado'),
-    won: bids.filter(b => b.status === 'arrematado'),
+    winning: bids.filter(b => b.status === 'WINNING'),
+    outbid: bids.filter(b => b.status === 'OUTBID'),
+    won: bids.filter(b => b.status === 'WON'),
+    lost: bids.filter(b => b.status === 'LOST'),
   };
 }
 ```

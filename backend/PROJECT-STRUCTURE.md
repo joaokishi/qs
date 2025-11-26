@@ -177,9 +177,9 @@ c:\Users\akiri\Downloads\qs\
 ### Auctions Module
 - **Função**: Gestão de leilões
 - **Features**:
-  - Criar/editar leilões
+  - Criar/editar leilões (validação 30min)
   - Iniciar/encerrar
-  - Controle de item atual
+  - Controle de item atual (timers sincronizados)
   - Cron jobs automáticos
   - WebSocket (tempo real)
 
@@ -189,7 +189,7 @@ c:\Users\akiri\Downloads\qs\
   - Realizar lances
   - Validação de incremento
   - Controle de concorrência
-  - Histórico de lances
+  - Histórico de lances (Dashboard "Meus Lances")
   - Cancelamento (admin)
 
 ### Audit Module

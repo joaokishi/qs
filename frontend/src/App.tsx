@@ -14,6 +14,7 @@ import AdminAuctionForm from './pages/AdminAuctionForm';
 import AuctionRoom from './pages/AuctionRoom';
 import AdminUsers from './pages/AdminUsers';
 import Profile from './pages/Profile';
+import MyBids from './pages/MyBids';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
 
           <Route element={<ProtectedRoute roles={['participant', 'admin']} />}>
             <Route path="auction/:id" element={<AuctionRoom />} />
+            <Route path="my-bids" element={<MyBids />} />
             <Route path="profile" element={<Profile />} />
           </Route>
         </Route>

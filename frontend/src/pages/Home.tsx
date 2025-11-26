@@ -47,9 +47,15 @@ const Home: React.FC = () => {
                                 )}
                                 <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded text-xs font-mono">
                                     {auction.status === 'ativo' ? (
-                                        <Timer endTime={auction.expectedEndDate} />
+                                        <>
+                                            <span className="mr-1 text-gray-400">Ends in:</span>
+                                            <Timer endTime={auction.currentItemEndTime || auction.expectedEndDate} />
+                                        </>
                                     ) : (
-                                        <span>Starts: {new Date(auction.startDate).toLocaleDateString()}</span>
+                                        <>
+                                            <span className="mr-1 text-gray-400">Starts in:</span>
+                                            <Timer endTime={auction.startDate} />
+                                        </>
                                     )}
                                 </div>
                             </div>

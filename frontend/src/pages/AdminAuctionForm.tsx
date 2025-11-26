@@ -10,7 +10,6 @@ const AdminAuctionForm: React.FC = () => {
 
     const [title, setTitle] = useState('');
     const [startTime, setStartTime] = useState('');
-    const [endTime, setEndTime] = useState('');
     const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
 
     const [items, setItems] = useState<Item[]>([]);
@@ -40,7 +39,6 @@ const AdminAuctionForm: React.FC = () => {
             setTitle(data.title);
             // Format dates for datetime-local input (YYYY-MM-DDThh:mm)
             setStartTime(new Date(data.startDate).toISOString().slice(0, 16));
-            setEndTime(new Date(data.expectedEndDate).toISOString().slice(0, 16));
             setSelectedItemIds(data.items.map(i => i.id));
         } catch (err) {
             setError('Failed to fetch auction details');
@@ -55,10 +53,19 @@ const AdminAuctionForm: React.FC = () => {
         setError('');
 
         try {
+            const start = new Date(startTime);
+            const now = new Date();
+            const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60000);
+
+            if (start < thirtyMinutesFromNow) {
+                setError('Start time must be at least 30 minutes from now');
+                setIsLoading(false);
+                return;
+            }
+
             const auctionData = {
                 title,
-                startDate: new Date(startTime).toISOString(),
-                expectedEndDate: new Date(endTime).toISOString(),
+                startDate: start.toISOString(),
                 itemIds: selectedItemIds,
             };
 
@@ -118,24 +125,13 @@ const AdminAuctionForm: React.FC = () => {
                                 className="input"
                                 value={startTime}
                                 onChange={(e) => setStartTime(e.target.value)}
-                                min={new Date().toISOString().slice(0, 16)}
-                                required
-                                style={{ cursor: 'pointer' }}
-                            />
-                        </div>
-                        <div className="input-group flex-1">
-                            <label className="label">
-                                Expected End Date & Time
-                                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 'normal', marginLeft: '0.5rem' }}>
-                                    (Click to open calendar)
-                                </span>
-                            </label>
-                            <input
-                                type="datetime-local"
-                                className="input"
-                                value={endTime}
-                                onChange={(e) => setEndTime(e.target.value)}
-                                min={startTime || new Date().toISOString().slice(0, 16)}
+                                min={(() => {
+                                    const now = new Date();
+                                    const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60000);
+                                    const offset = thirtyMinutesFromNow.getTimezoneOffset();
+                                    const localThirtyMinutesFromNow = new Date(thirtyMinutesFromNow.getTime() - (offset * 60000));
+                                    return localThirtyMinutesFromNow.toISOString().slice(0, 16);
+                                })()}
                                 required
                                 style={{ cursor: 'pointer' }}
                             />

@@ -3,6 +3,8 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -12,6 +14,7 @@ import { User } from '@/modules/users/user.entity';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { BidStatus } from '@/common/enums/bid.enum';
 import { AuctionStatus } from '@/common/enums/auction.enum';
+import { AuctionGateway } from '@/modules/auctions/auction.gateway';
 
 @Injectable()
 export class BidsService {
@@ -21,6 +24,8 @@ export class BidsService {
     @InjectRepository(Item)
     private itemRepository: Repository<Item>,
     private dataSource: DataSource,
+    @Inject(forwardRef(() => AuctionGateway))
+    private auctionGateway: AuctionGateway,
   ) { }
 
   async placeBid(userId: string, createBidDto: CreateBidDto) {
@@ -50,7 +55,8 @@ export class BidsService {
 
       const minimumBid = Number(item.currentValue) + Number(item.minimumIncrement);
 
-      if (createBidDto.amount < minimumBid) {
+      // Use a small epsilon for floating point comparison to avoid precision issues
+      if (createBidDto.amount < minimumBid - 0.001) {
         throw new BadRequestException(
           `Lance mínimo é ${minimumBid.toFixed(2)}`,
         );
@@ -89,6 +95,13 @@ export class BidsService {
       item.currentValue = createBidDto.amount;
       await manager.save(Item, item);
 
+      // Buscar dados do usuário para notificação
+      const user = await manager.findOne(User, { where: { id: userId } });
+      bid.user = user;
+
+      // Notificar via WebSocket
+      this.auctionGateway.notifyNewBid(item.id, item.auctionId, bid);
+
       return bid;
     });
   }
@@ -96,7 +109,7 @@ export class BidsService {
   async getUserBids(userId: string) {
     return this.bidRepository.find({
       where: { userId },
-      relations: ['item', 'item.category'],
+      relations: ['item', 'item.category', 'item.auction'],
       order: { createdAt: 'DESC' },
     });
   }
