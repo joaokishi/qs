@@ -1,73 +1,63 @@
-# React + TypeScript + Vite
+# Frontend (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface web do Sistema de Leilão Online.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node.js 18+
+- Backend rodando em `http://localhost:3000`
 
-## React Compiler
+O Vite já está configurado para fazer proxy para o backend:
+- `'/api'` → `http://localhost:3000`
+- `'/socket.io'` (WS) → `http://localhost:3000`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Instalação
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```powershell
+cd frontend
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Desenvolvimento
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```powershell
+npm run dev
 ```
+
+Aplicação: `http://localhost:5173`
+
+Se necessário, ajuste o CORS do backend no `.env`:
+```env
+WS_CORS_ORIGIN=http://localhost:5173
+```
+
+## Build e Preview
+
+```powershell
+npm run build
+npm run preview
+```
+
+## Autenticação
+
+- O token JWT é armazenado no `localStorage` como `token`.
+- Requisições são feitas via Axios (`src/api/axios.ts`) com baseURL `/api`.
+- WebSocket usa namespace `/auction` e envia `auth.token` com `Bearer <JWT>`.
+
+## Estrutura
+
+- `src/pages` — telas principais (Dashboard, Auctions, AuctionRoom, Admin, etc.)
+- `src/components` — componentes compartilhados (Navbar, Timer, BidControls, etc.)
+- `src/context` — contextos (Auth, Notifications, Socket)
+- `src/api` — chamadas de API organizadas por domínio
+
+## Credenciais de exemplo (seed)
+
+Após rodar `npm run seed` no backend:
+- Admin: `admin@auction.com` / `admin123`
+- Participante: `joao@email.com` / `senha123`
+
+## Dicas
+
+- Inicie o backend primeiro (`npm run start:dev` na pasta `backend`).
+- A documentação da API está em `http://localhost:3000/api/docs` (Swagger).

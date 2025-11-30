@@ -7,27 +7,19 @@
 ```powershell
 npm install
 ```
+### 2️⃣ Configurar Ambiente
 
-### 2️⃣ Configurar Banco de Dados
-
-**Criar o banco de dados MySQL:**
-```sql
-CREATE DATABASE auction_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
+Copie o arquivo `.env` de exemplo:
 **Configurar o arquivo `.env`:**
 ```powershell
 Copy-Item .env.example .env
 ```
-
+Edite o `.env` conforme necessário. Por padrão o projeto usa banco embutido SQL.js em `./data/auction_system.db`.
 Edite o `.env` com suas credenciais do MySQL:
-```env
-DB_HOST=localhost
-DB_PORT=3306
-DB_USERNAME=root
-DB_PASSWORD=SUA_SENHA_MYSQL
 DB_DATABASE=auction_system
 JWT_SECRET=uma_chave_secreta_muito_forte
+PORT=3000
+WS_CORS_ORIGIN=http://localhost:5173
 ```
 
 ### 3️⃣ Executar Seed (Popular Banco)
@@ -208,13 +200,6 @@ socket.on('user:outbid', (data) => {
 
 ## 🐛 Problemas Comuns
 
-### Erro: "Cannot connect to MySQL"
-```
-✖ Verifique se o MySQL está rodando
-✖ Confirme usuário e senha no .env
-✖ Certifique-se que o banco 'auction_system' existe
-```
-
 ### Erro: "JWT_SECRET is not defined"
 ```
 ✖ Configure JWT_SECRET no arquivo .env
@@ -228,13 +213,13 @@ Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess | Stop-Proc
 
 ## 📦 Docker (Opcional)
 
-Se preferir usar Docker:
+Se preferir usar MySQL com Docker, execute:
 
 ```powershell
 docker-compose up -d
 ```
 
-Isso iniciará MySQL + Backend automaticamente.
+Depois ajuste a configuração do TypeORM para usar MySQL.
 
 ## 🎓 Próximos Passos
 

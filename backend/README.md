@@ -1,18 +1,16 @@
 # Sistema de Leilão Online - Backend
 
-Sistema completo de leilões online desenvolvido com NestJS, MySQL e TypeORM, implementando todos os requisitos funcionais e não funcionais especificados.
+Backend do sistema de leilões online desenvolvido com NestJS e TypeORM. Por padrão utiliza banco embutido SQL.js (arquivo em `./data/auction_system.db`), dispensando instalação de servidor de banco. Integração com MySQL via Docker Compose é opcional e requer ajustar a configuração do TypeORM.
 
 ## 🚀 Tecnologias
 
-- **NestJS** 10.x - Framework Node.js
-- **TypeORM** 0.3.x - ORM para banco de dados
-- **MySQL** 8.0 - Banco de dados relacional
-- **Socket.IO** 4.x - WebSockets para tempo real
-- **JWT** - Autenticação e autorização
-- **Bcrypt** - Criptografia de senhas
-- **Sharp** - Processamento de imagens
-- **Nodemailer** - Envio de e-mails
-- **Swagger** - Documentação da API
+- NestJS 10
+- TypeORM 0.3
+- SQL.js (padrão) com persistência em arquivo
+- Socket.IO 4 (tempo real)
+- JWT + Passport
+- Bcrypt, Sharp, Nodemailer
+- Swagger/OpenAPI
 
 ## 📋 Requisitos Implementados
 
@@ -34,7 +32,7 @@ Sistema completo de leilões online desenvolvido com NestJS, MySQL e TypeORM, im
 
 ### Requisitos Não Funcionais
 
-✅ **RNF01** - Segurança (JWT, bcrypt, HTTPS)  
+✅ **RNF01** - Segurança (JWT, bcrypt, headers com Helmet)  
 ✅ **RNF02** - Integridade Transacional (pessimistic locks, transações)  
 ✅ **RNF03** - Atualização em Tempo Real (WebSocket < 1s latência)  
 ✅ **RNF04** - Auditoria (logs imutáveis)  
@@ -71,9 +69,9 @@ Sistema completo de leilões online desenvolvido com NestJS, MySQL e TypeORM, im
 └────────────────────────┼────────────────────────────────────┘
                          │
 ┌────────────────────────┴────────────────────────────────────┐
-│                     MySQL Database                           │
-│  - Users, Categories, Items, Auctions                        │
-│  - Bids (com locks), AuditLogs                              │
+│               Banco de Dados (padrão: SQL.js)               │
+│  - Arquivo: ./data/auction_system.db                        │
+│  - Entidades: Users, Categories, Items, Auctions, Bids, AuditLogs |
 └──────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────┐
@@ -87,14 +85,15 @@ Sistema completo de leilões online desenvolvido com NestJS, MySQL e TypeORM, im
 
 ### Pré-requisitos
 
-- Node.js 18+ instalado
-- MySQL 8.0+ instalado e rodando
-- npm ou yarn
+- Node.js 18+ e npm
+- Sem banco externo: usa SQL.js por padrão
 
-### Passo 1: Clonar e instalar dependências
+Opcional (para usar MySQL com Docker): Docker Desktop
+
+### Passo 1: Instalar dependências
 
 ```powershell
-cd c:\Users\akiri\Downloads\qs
+cd backend
 npm install
 ```
 
@@ -106,46 +105,52 @@ Copie o arquivo `.env.example` para `.env`:
 Copy-Item .env.example .env
 ```
 
-Edite o arquivo `.env` com suas configurações:
+Edite o arquivo `.env` (veja `.env.example`). Principais variáveis:
 
 ```env
-# Database
-DB_HOST=localhost
-DB_PORT=3306
-DB_USERNAME=root
-DB_PASSWORD=sua_senha_mysql
-DB_DATABASE=auction_system
+# Banco embutido (padrão)
+DB_PATH=./data/auction_system.db
 
 # JWT
-JWT_SECRET=sua_chave_secreta_jwt_muito_segura
+JWT_SECRET=uma_chave_secreta_muito_forte
 JWT_EXPIRATION=24h
 
-# Application
+# Aplicação
 PORT=3000
 NODE_ENV=development
 
-# Email
+# E-mail (opcional)
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USER=seu_email@gmail.com
 MAIL_PASSWORD=sua_senha_app
 MAIL_FROM=noreply@auction.com
 
-# Upload
+# Uploads
 MAX_FILE_SIZE=5242880
 UPLOAD_PATH=./uploads
 
-# WebSocket
-WS_CORS_ORIGIN=http://localhost:4200
+# CORS/WS (ajuste para o Vite)
+WS_CORS_ORIGIN=http://localhost:5173
 ```
 
-### Passo 3: Criar banco de dados
+### Passo 3: (Opcional) MySQL via Docker
 
-```sql
-CREATE DATABASE auction_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+O projeto já roda com SQL.js. Se preferir MySQL, suba com Docker e ajuste a config do TypeORM para MySQL:
+
+```powershell
+docker-compose up -d
 ```
 
-### Passo 4: Rodar a aplicação
+### Passo 4: Popular dados (seed)
+
+```powershell
+npm run seed
+```
+
+Isso cria um admin e usuários de exemplo (veja abaixo).
+
+### Passo 5: Rodar a aplicação
 
 **Desenvolvimento (com hot-reload):**
 ```powershell
@@ -162,17 +167,9 @@ A aplicação estará disponível em:
 - API: http://localhost:3000/api
 - Documentação Swagger: http://localhost:3000/api/docs
 
-## 🐳 Docker (Alternativa)
+## 🐳 Docker (Opcional)
 
-Para rodar com Docker Compose (MySQL + App):
-
-```powershell
-docker-compose up -d
-```
-
-Isso iniciará:
-- MySQL na porta 3306
-- Backend na porta 3000
+`docker-compose.yml` fornece MySQL + Backend. Útil se decidir migrar do SQL.js para MySQL. Lembre-se de ajustar o `typeorm.config.ts` para o driver MySQL.
 
 ## 📡 Endpoints Principais
 
@@ -349,7 +346,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 5. **Helmet**: Headers de segurança HTTP
 6. **Validação**: Class-validator em todos os DTOs
 7. **SQL Injection**: Prevenido pelo TypeORM
-8. **Race Conditions**: Locks pessimistas em transações
+8. **Race Conditions**: Controle transacional nas operações de lance
 
 ## 📊 Sistema de Lances
 
@@ -398,6 +395,15 @@ Item (1) ──────< (N) Bid
 Category (1) ──< (N) Item
 Auction (1) ───< (N) Item
 ```
+
+## 👤 Credenciais de exemplo (seed)
+
+Após `npm run seed`:
+- Admin: `admin@auction.com` / `admin123`
+- Participante: `joao@email.com` / `senha123`
+- Participante: `maria@email.com` / `senha123`
+- Participante: `pedro@email.com` / `senha123`
+
 
 ## 🧪 Testes
 

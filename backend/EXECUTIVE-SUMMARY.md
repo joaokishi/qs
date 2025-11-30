@@ -2,7 +2,7 @@
 
 ## 🎯 Visão Geral
 
-Sistema completo de leilões online desenvolvido em **NestJS**, **MySQL** e **TypeORM**, implementando **13 requisitos funcionais** e **9 requisitos não funcionais** com foco em segurança, escalabilidade e experiência do usuário.
+Sistema de leilões online desenvolvido em **NestJS** e **TypeORM**. Por padrão utiliza **SQL.js** (banco embutido em arquivo), com opção de integração a **MySQL** via Docker se desejado. Implementa requisitos funcionais e não funcionais com foco em segurança, tempo real e experiência do usuário.
 
 ## ✅ Status de Implementação
 
@@ -39,10 +39,10 @@ Sistema completo de leilões online desenvolvido em **NestJS**, **MySQL** e **Ty
 ## 🚀 Tecnologias Utilizadas
 
 ### Backend
-- **Framework**: NestJS 10.x
-- **ORM**: TypeORM 0.3.x
-- **Banco de Dados**: MySQL 8.0
-- **Linguagem**: TypeScript 5.x
+- Framework: NestJS 10
+- ORM: TypeORM 0.3
+- Banco de dados: SQL.js (padrão, arquivo em ./data)
+- Linguagem: TypeScript 5
 
 ### Real-time
 - **WebSocket**: Socket.IO 4.x
@@ -64,16 +64,13 @@ Sistema completo de leilões online desenvolvido em **NestJS**, **MySQL** e **Ty
 ## 📈 Métricas Técnicas
 
 ### Performance
-- ⚡ Latência WebSocket: < 1 segundo
-- 📊 Carregamento de páginas: < 2 segundos
-- 🖼️ Otimização de imagens: Automática (Sharp)
-- 🔄 Transações: ACID compliant
+- Atualizações em tempo real via WebSocket
+- Otimização de imagens (Sharp)
+- Operações críticas com controle transacional
 
 ### Escalabilidade
-- 📦 Arquitetura modular (13 módulos)
-- 🔌 Stateless (suporta load balancing)
-- 💾 Índices otimizados no banco
-- 🚀 Pronto para horizontal scaling
+- Arquitetura modular
+- Stateless (suporta horizontal scaling)
 
 ### Confiabilidade
 - 🔒 Controle de concorrência (locks)
@@ -92,8 +89,7 @@ Guards:          2 (JWT, Roles)
 Estratégias:     1 (JWT)
 Enums:           5
 DTOs:            ~15
-Endpoints:       ~40
-WebSocket Events: 10
+Endpoints REST e eventos WebSocket implementados conforme módulos
 ```
 
 ## 🎭 Casos de Uso Principais
@@ -147,7 +143,7 @@ WebSocket Events: 10
 
 ## 🎁 Destaques Técnicos
 
-### 1. Controle de Concorrência Robusto
+### 1. Controle de Concorrência
 ```typescript
 // Transações com locks pessimistas
 await manager.findOne(Item, {
@@ -185,9 +181,9 @@ await sharp(file.buffer)
 
 ### Código
 - ✅ Backend completo em NestJS
-- ✅ 13 módulos implementados
-- ✅ 6 entidades do banco
-- ✅ ~40 endpoints RESTful
+- ✅ Módulos principais (auth, users, categories, items, auctions, bids, audit, dashboard, notifications)
+- ✅ Entidades do banco (User, Category, Item, Auction, Bid, AuditLog)
+- ✅ Endpoints RESTful e WebSocket Gateway
 - ✅ WebSocket Gateway
 - ✅ Seed de dados
 
@@ -236,7 +232,7 @@ await sharp(file.buffer)
 | RF11 | Encerramento | ✅ | Automático (cron) |
 | RF12 | Notificações | ✅ | Nodemailer |
 | RF13 | Soft Close | ✅ | 15 segundos |
-| RNF01 | Segurança | ✅ | JWT + bcrypt + HTTPS |
+| RNF01 | Segurança | ✅ | JWT + bcrypt + Helmet |
 | RNF02 | Integridade | ✅ | Pessimistic locks |
 | RNF03 | Tempo Real | ✅ | < 1s latência |
 | RNF04 | Auditoria | ✅ | Logs imutáveis |

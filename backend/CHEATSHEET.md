@@ -22,46 +22,15 @@ npm run build
 npm run start:prod
 ```
 
-## 🐳 Docker
+## 🗄️ Banco de Dados (SQL.js)
 
+Arquivo: `./data/auction_system.db`
+
+Reset rápido do banco local:
 ```powershell
-# Iniciar containers
-docker-compose up -d
-
-# Ver logs
-docker-compose logs -f
-
-# Parar containers
-docker-compose down
-
-# Rebuild
-docker-compose up -d --build
-```
-
-## 🗄️ Banco de Dados
-
-### MySQL CLI
-```powershell
-# Conectar ao MySQL
-mysql -u root -p
-
-# Criar banco
-CREATE DATABASE auction_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-# Usar banco
-USE auction_system;
-
-# Ver tabelas
-SHOW TABLES;
-
-# Descrever tabela
-DESCRIBE users;
-
-# Ver dados
-SELECT * FROM users;
-
-# Limpar banco (cuidado!)
-DROP DATABASE auction_system;
+Stop-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess -ErrorAction SilentlyContinue
+Remove-Item -Force -ErrorAction SilentlyContinue data\auction_system.db
+npm run seed
 ```
 
 ### TypeORM Migrations
@@ -165,56 +134,9 @@ curl http://localhost:3000/api/bids/my-bids \
   -H "Authorization: Bearer SEU_TOKEN"
 ```
 
-## 📊 SQL Úteis
+## 📊 Observações sobre consultas
 
-### Estatísticas
-```sql
--- Total de lances por item
-SELECT i.name, COUNT(b.id) as total_lances
-FROM items i
-LEFT JOIN bids b ON i.id = b.itemId
-GROUP BY i.id
-ORDER BY total_lances DESC;
-
--- Maior lance por item
-SELECT i.name, MAX(b.amount) as maior_lance
-FROM items i
-LEFT JOIN bids b ON i.id = b.itemId
-GROUP BY i.id;
-
--- Top 10 participantes
-SELECT u.name, COUNT(b.id) as total_lances
-FROM users u
-LEFT JOIN bids b ON u.id = b.userId
-WHERE u.role = 'participant'
-GROUP BY u.id
-ORDER BY total_lances DESC
-LIMIT 10;
-
--- Receita por categoria
-SELECT c.name, SUM(b.amount) as receita
-FROM categories c
-JOIN items i ON c.id = i.categoryId
-JOIN bids b ON i.id = b.itemId
-WHERE b.status = 'arrematado'
-GROUP BY c.id
-ORDER BY receita DESC;
-```
-
-### Limpeza
-```sql
--- Limpar lances de teste
-DELETE FROM bids WHERE userId IN (
-  SELECT id FROM users WHERE email LIKE '%teste%'
-);
-
--- Resetar leilão
-UPDATE auctions SET status = 'agendado' WHERE id = 'UUID';
-UPDATE items SET currentValue = initialValue WHERE auctionId = 'UUID';
-DELETE FROM bids WHERE itemId IN (
-  SELECT id FROM items WHERE auctionId = 'UUID'
-);
-```
+Como o projeto usa SQL.js, consultas diretas devem ser feitas via aplicação. Para análises, exporte o arquivo `.db` para ferramentas compatíveis.
 
 ## 🔍 Debug e Logs
 
@@ -265,14 +187,9 @@ Get-NetTCPConnection -LocalPort 3000
 Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess | Stop-Process
 ```
 
-### Resetar MySQL completamente
-```sql
-DROP DATABASE auction_system;
-CREATE DATABASE auction_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-Depois:
+### Resetar banco embutido (SQL.js)
 ```powershell
+Remove-Item -Force -ErrorAction SilentlyContinue data\auction_system.db
 npm run seed
 ```
 
@@ -323,7 +240,7 @@ Adicione ao `.vscode/settings.json`:
   "terminal.integrated.profiles.windows": {
     "PowerShell": {
       "source": "PowerShell",
-      "args": ["-NoExit", "-Command", "cd c:\\Users\\akiri\\Downloads\\qs"]
+      "args": ["-NoExit", "-Command", "cd c:\\Users\\João\\Downloads\\qs\\qs\\backend"]
     }
   }
 }
@@ -337,15 +254,6 @@ Remove-Item -Recurse -Force node_modules, package-lock.json
 npm install
 ```
 
-### Erro de conexão MySQL
-```powershell
-# Verificar se MySQL está rodando
-Get-Service MySQL*
-
-# Iniciar MySQL
-Start-Service MySQL80
-```
-
 ### Porta em uso
 ```powershell
 # Alterar porta no .env
@@ -355,13 +263,10 @@ PORT=3001
 Stop-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess
 ```
 
-### TypeORM não sincroniza
+### CORS para o Vite (frontend)
 ```env
-# No .env, ative temporariamente:
-DB_SYNCHRONIZE=true
+WS_CORS_ORIGIN=http://localhost:5173
 ```
-
-Reinicie o servidor, depois volte para `false`.
 
 ---
 

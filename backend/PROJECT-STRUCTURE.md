@@ -3,8 +3,8 @@
 ## Árvore de Diretórios
 
 ```
-c:\Users\akiri\Downloads\qs\
-├── src/                              # Código fonte
+c:\Users\João\Downloads\qs\qs\backend\
+├── src/                              # Código fonte (NestJS)
 │   ├── common/                       # Recursos compartilhados
 │   │   └── enums/                    # Enumerações
 │   │       ├── auction.enum.ts       # Status do leilão
@@ -14,7 +14,7 @@ c:\Users\akiri\Downloads\qs\
 │   │       └── audit.enum.ts         # Ações de auditoria
 │   │
 │   ├── config/                       # Configurações
-│   │   └── typeorm.config.ts         # Config do banco de dados
+│   │   └── typeorm.config.ts         # Config do TypeORM (SQL.js por padrão)
 │   │
 │   ├── modules/                      # Módulos da aplicação
 │   │   │
@@ -96,8 +96,10 @@ c:\Users\akiri\Downloads\qs\
 │   ├── main.ts                       # Ponto de entrada
 │   └── seed.ts                       # Script de seed do banco
 │
-├── uploads/                          # Arquivos enviados
-│   └── items/                        # Imagens dos itens
+├── data/                             # Banco SQL.js (arquivo .db)
+│   └── auction_system.db             # Criado em runtime (se não existir)
+│
+├── uploads/                          # Uploads (criado em runtime)
 │
 ├── test/                             # Testes
 │   └── jest-e2e.json                 # Config de testes E2E
@@ -126,7 +128,7 @@ c:\Users\akiri\Downloads\qs\
 - **@nestjs/websockets** - WebSocket
 - **@nestjs/schedule** - Cron jobs
 - **typeorm** - ORM
-- **mysql2** - Driver MySQL
+- **sql.js** - Banco embutido (padrão)
 - **bcrypt** - Criptografia de senhas
 - **class-validator** - Validação
 - **class-transformer** - Transformação de dados
